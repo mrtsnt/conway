@@ -2,7 +2,6 @@ package main
 
 import (
 	"math/rand"
-    t "time"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
@@ -15,7 +14,7 @@ const (
 	gridCols = 64
 )
 
-func drawGrid(grid [][]bool, imd *imdraw.IMDraw) {
+func pushGrid(grid [][]bool, imd *imdraw.IMDraw) {
     imd.Color = colornames.White
 
 	for y := len(grid) - 1; y >= 0; y-- {
@@ -46,19 +45,29 @@ func testPop(grid [][]bool) {
 func run() {
 	win := createWindow()
 	imd := imdraw.New(nil)
+    imd.Color = colornames.White
     grid := createGrid()
 
 	for !win.Closed() {
-		imd.Clear()
+        if win.Pressed(pixelgl.MouseButtonLeft) {
 
-        testPop(grid)
-        drawGrid(grid, imd)
+            mousePos := win.MousePosition()
+            msGridX := int(mousePos.X / 10)
+            msGridY := int(mousePos.Y / 10)
 
-		win.Clear(colornames.Black)
-		imd.Draw(win)
+            if msGridX >= 0 && msGridX < gridCols && msGridY >= 0 && msGridY < gridRows {
+
+                if !grid[msGridY][msGridX] {
+                    xV := float64(msGridX) * 10.0
+                    yV := float64(msGridY) * 10.0
+                    imd.Push(pixel.V(xV+1.0, yV+1.0), pixel.V(xV+9.0, yV+9.0))
+                    imd.Rectangle(0)
+                    imd.Draw(win)
+                }
+            }
+        }
+
 		win.Update()
-
-        t.Sleep(t.Millisecond * 500)
 	}
 }
 

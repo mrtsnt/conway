@@ -72,7 +72,8 @@ func run() {
             win.Clear(colornames.Black)
             grid.makeTurn()
             drawGrid(grid.activeGrid(), imd)
-            time.Sleep(time.Second)
+            imd.Draw(win)
+            time.Sleep(time.Millisecond * 250)
 
             if win.JustPressed(pixelgl.KeySpace) {
                 imd.Clear()

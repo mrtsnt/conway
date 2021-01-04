@@ -18,7 +18,6 @@ var drawMode = true
 
 func drawGrid(grid [][]bool, imd *imdraw.IMDraw) {
     imd.Clear()
-    imd.Color = colornames.White
 
 	for y := len(grid) - 1; y >= 0; y-- {
 		for x := range grid[y] {
@@ -26,6 +25,7 @@ func drawGrid(grid [][]bool, imd *imdraw.IMDraw) {
 				xV := float64(x) * 10.0
 				yV := float64(y) * 10.0
 				imd.Push(pixel.V(xV+1.0, yV+1.0), pixel.V(xV+9.0, yV+9.0))
+                imd.Color = colornames.White
 				imd.Rectangle(0)
 			}
 		}
@@ -72,7 +72,7 @@ func run() {
             win.Clear(colornames.Black)
             grid.makeTurn()
             drawGrid(grid.activeGrid(), imd)
-            time.Sleep(time.Millisecond * 500)
+            time.Sleep(time.Second)
 
             if win.JustPressed(pixelgl.KeySpace) {
                 imd.Clear()

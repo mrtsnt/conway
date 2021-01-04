@@ -1,9 +1,5 @@
 package main
 
-import (
-    "fmt"
-)
-
 type grid int
 const (
     A grid = iota
@@ -35,7 +31,6 @@ func newGrid(r int, c int) *gameGrid {
 }
 
 func (g *gameGrid) makeTurn() {
-    fmt.Println("making turn")
     var src, tgt [][]bool
     if g.currentGrid == A {
         src, tgt, g.currentGrid = g.gridA, g.gridB, B
@@ -60,8 +55,7 @@ func getNeighbours(x int, y int, grid [][]bool) int {
 
     for i := y - 1; i <= y + 1; i++ {
         for j := x - 1; j <= x + 1; j++ {
-            if i >= 0 && i < len(grid) && j >= 0 && j < len(grid[0]) && grid[i][j] {
-                fmt.Println("checking {X} {Y}", x, y)
+            if i >= 0 && i < len(grid) && j >= 0 && j < len(grid[0]) && (y != i || x != j) && grid[i][j] {
                 neigbours++
             }
         }

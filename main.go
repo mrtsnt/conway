@@ -1,7 +1,7 @@
 package main
 
 import (
-	"math/rand"
+    "time"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
@@ -10,11 +10,14 @@ import (
 )
 
 const (
-	gridRows = 48
-	gridCols = 64
+	gridRows = 65
+	gridCols = 120
 )
 
-func pushGrid(grid [][]bool, imd *imdraw.IMDraw) {
+var drawMode = true
+
+func drawGrid(grid [][]bool, imd *imdraw.IMDraw) {
+    imd.Clear()
     imd.Color = colornames.White
 
 	for y := len(grid) - 1; y >= 0; y-- {
@@ -29,41 +32,53 @@ func pushGrid(grid [][]bool, imd *imdraw.IMDraw) {
 	}
 }
 
-func testPop(grid [][]bool) {
-	for y := range grid {
-		for x := range grid[y] {
-			r := rand.Intn(2)
-			if r == 0 {
-				grid[y][x] = true
-			} else {
-				grid[y][x] = false
-			}
-		}
-	}
-}
-
 func run() {
-	win := createWindow()
+	win := newWindow()
 	imd := imdraw.New(nil)
-    imd.Color = colornames.White
-    grid := createGrid()
+    grid := newGrid(gridRows, gridCols)
 
 	for !win.Closed() {
-        if win.Pressed(pixelgl.MouseButtonLeft) {
 
-            mousePos := win.MousePosition()
-            msGridX := int(mousePos.X / 10)
-            msGridY := int(mousePos.Y / 10)
+        if drawMode {
 
-            if msGridX >= 0 && msGridX < gridCols && msGridY >= 0 && msGridY < gridRows {
+            if win.JustPressed(pixelgl.KeySpace) {
+                imd.Clear()
+                win.Clear(colornames.Black)
+                grid.reset()
+            }
 
-                if !grid[msGridY][msGridX] {
-                    xV := float64(msGridX) * 10.0
-                    yV := float64(msGridY) * 10.0
-                    imd.Push(pixel.V(xV+1.0, yV+1.0), pixel.V(xV+9.0, yV+9.0))
-                    imd.Rectangle(0)
-                    imd.Draw(win)
+            if win.Pressed(pixelgl.MouseButtonLeft) {
+                mousePos := win.MousePosition()
+                msGridX := int(mousePos.X / 10)
+                msGridY := int(mousePos.Y / 10)
+
+                if msGridX >= 0 && msGridX < gridCols && msGridY >= 0 && msGridY < gridRows {
+
+                    if !grid.gridA[msGridY][msGridX] {
+                        xV := float64(msGridX) * 10.0
+                        yV := float64(msGridY) * 10.0
+                        imd.Push(pixel.V(xV+1.0, yV+1.0), pixel.V(xV+9.0, yV+9.0))
+                        imd.Color = colornames.White
+                        imd.Rectangle(0)
+                        imd.Draw(win)
+                        grid.gridA[msGridY][msGridX] = true
+                    }
                 }
+            }
+
+            drawMode = !win.JustPressed(pixelgl.KeyP)
+        } else {
+            imd.Clear()
+            win.Clear(colornames.Black)
+            grid.makeTurn()
+            drawGrid(grid.activeGrid(), imd)
+            time.Sleep(time.Millisecond * 500)
+
+            if win.JustPressed(pixelgl.KeySpace) {
+                imd.Clear()
+                win.Clear(colornames.Black)
+                grid.reset()
+                drawMode = true
             }
         }
 
@@ -71,16 +86,7 @@ func run() {
 	}
 }
 
-func createGrid() [][]bool {
-	grid := make([][]bool, gridRows)
-	for r := range grid {
-		grid[r] = make([]bool, gridCols)
-	}
-
-    return grid
-}
-
-func createWindow() *pixelgl.Window {
+func newWindow() *pixelgl.Window {
 	cfg := pixelgl.WindowConfig{
 		Title:  "conway",
 		Bounds: pixel.R(0, 0, gridCols*10, gridRows*10),
